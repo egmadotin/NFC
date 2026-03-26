@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+db.sqlite3
+nfc_backend/db.sqlite3
+
+# Node.js
+nfc_frontend/node_modules/
+nfc_frontend/.next/
+nfc_frontend/out/
+nfc_frontend/build/
+.DS_Store
+
+# Agent
+nfc_agent/build/
+nfc_agent/dist/
+nfc_agent/*.spec
+nfc_agent/__pycache__/
+
+# IDE
+.vscode/
+.idea/
+.gemini/

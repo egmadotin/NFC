@@ -1,0 +1,6 @@
+{
+    "server_url": "http://127.0.0.1:8000/api/scans/",
+    "reader_name": "ACR122U",
+    "scan_interval": 0.5,
+    "retry_interval": 2
+}

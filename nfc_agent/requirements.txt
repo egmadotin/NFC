@@ -1,0 +1,5 @@
+pyscard
+requests
+pystray
+Pillow
+pyinstaller
