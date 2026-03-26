@@ -17,7 +17,9 @@ The NFC Reader System is a full-stack application that integrates with an ACR122
 
 ### 1. Backend Setup
 1. Open a terminal in `nfc_backend/`.
-2. Install dependencies:
+2. Activate (Windows)
+.\venv\Scripts\activate
+3. Install dependencies:
    ```bash
    pip install django djangorestframework channels[daphne] pyscard django-cors-headers
    ```

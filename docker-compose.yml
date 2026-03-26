@@ -1,0 +1,24 @@
+
+services:
+  backend:
+    build:
+      context: ./nfc_backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nfc_backend/db.sqlite3:/app/db.sqlite3
+    environment:
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+
+  frontend:
+    build:
+      context: ./nfc_frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000

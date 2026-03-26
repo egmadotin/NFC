@@ -9,9 +9,29 @@ import threading
 nfc_thread = None
 stop_nfc = threading.Event()
 
-class ScanViewSet(viewsets.ReadOnlyModelViewSet):
+class ScanViewSet(viewsets.ModelViewSet):
     queryset = Scan.objects.all().order_by('-timestamp')
     serializer_class = ScanSerializer
+
+    def perform_create(self, serializer):
+        scan = serializer.save()
+        
+        from .nfc_reader import broadcast_scan, broadcast_status
+        
+        # Broadcast the scan result
+        broadcast_scan({
+            "type": "scan_result",
+            "id": scan.id,
+            "uid": scan.uid,
+            "atr": scan.atr,
+            "timestamp": scan.timestamp.isoformat(),
+            "status": "success"
+        })
+        
+        # Also update status since we just got a successful scan from a device
+        # Note: the payload has a 'device' field, but it's not in the model. Agent sends it.
+        device_name = self.request.data.get("device", "Remote Agent")
+        broadcast_status("connected", reader_name=device_name)
 
 @api_view(['POST'])
 def start_nfc(request):
