@@ -32,6 +32,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     let ws: WebSocket;
+    let reconnectTimeout: NodeJS.Timeout;
 
     const connectWS = () => {
       ws = new WebSocket(WS_URL);
@@ -42,24 +43,31 @@ export default function Dashboard() {
       };
 
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'reader_status') {
-          const oldStatus = readerStatus;
-          setReaderStatus(data.status);
-          setReaderName(data.reader_name);
+        try {
+          const data = JSON.parse(event.data);
           
-          if (data.status === 'connected' && oldStatus !== 'connected') {
-            showToast(`Reader Connected: ${data.reader_name}`, 'success');
-          } else if (data.status === 'disconnected' && oldStatus === 'connected') {
-            showToast('NFC Reader Disconnected!', 'error');
+          if (data.type === 'reader_status') {
+            setReaderStatus((prevStatus) => {
+              const newStatus = data.status;
+              const newReaderName = data.reader_name;
+              setReaderName(newReaderName);
+              
+              if (newStatus === 'connected' && prevStatus !== 'connected') {
+                showToast(`Reader Connected: ${newReaderName}`, 'success');
+              } else if (newStatus === 'disconnected' && prevStatus === 'connected') {
+                showToast('NFC Reader Disconnected!', 'error');
+              }
+              return newStatus;
+            });
+          } else if (data.uid) { // Scan result
+            const scanData: ScanData = data;
+            setCurrentScan(scanData);
+            setScans((prev) => [scanData, ...prev.slice(0, 9)]);
+            triggerPulse();
+            playBeep();
           }
-        } else if (data.uid) { // Scan result
-          const scanData: ScanData = data;
-          setCurrentScan(scanData);
-          setScans((prev) => [scanData, ...prev.slice(0, 9)]);
-          triggerPulse();
-          playBeep();
+        } catch (err) {
+          console.error('Error parsing WS message', err);
         }
       };
 
@@ -67,15 +75,18 @@ export default function Dashboard() {
         setIsConnected(false);
         setReaderStatus('disconnected');
         console.log('Disconnected from NFC WebSocket');
-        setTimeout(connectWS, 3000);
+        reconnectTimeout = setTimeout(connectWS, 3000);
       };
     };
 
     connectWS();
     fetchHistory();
 
-    return () => ws?.close();
-  }, [readerStatus]);
+    return () => {
+      ws?.close();
+      clearTimeout(reconnectTimeout);
+    };
+  }, []);
 
   const fetchHistory = async () => {
     try {
