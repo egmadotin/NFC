@@ -10,6 +10,9 @@ from smartcard.System import readers
 from smartcard.util import toHexString
 from pystray import Icon, Menu, MenuItem
 from PIL import Image, ImageDraw
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -18,8 +21,10 @@ logger = logging.getLogger(__name__)
 class NFCAgent:
     def __init__(self):
         self.config = self.load_config()
-        self.server_url = self.config.get("server_url", "http://127.0.0.1:8000/api/scans/")
-        self.reader_name_target = self.config.get("reader_name", "ACR122U")
+        self.server_url = os.getenv("NFC_AGENT_SERVER_URL", self.config.get("server_url", "http://127.0.0.1:8000/api/scans/"))
+        self.reader_name_target = os.getenv("NFC_AGENT_READER_NAME", self.config.get("reader_name", "ACR122U"))
+        self.scan_interval = float(os.getenv("NFC_AGENT_SCAN_INTERVAL", self.config.get("scan_interval", 0.5)))
+        self.retry_interval = float(os.getenv("NFC_AGENT_RETRY_INTERVAL", self.config.get("retry_interval", 2)))
         self.running = True
         self.reader_connected = False
         self.last_uid = None
@@ -87,7 +92,7 @@ class NFCAgent:
                 if self.reader_connected:
                     logger.warning("Reader disconnected")
                     self.update_status(False)
-                time.sleep(2)
+                time.sleep(self.retry_interval)
                 continue
 
             if not self.reader_connected:
@@ -123,7 +128,7 @@ class NFCAgent:
                 # Card removed or connection lost
                 self.last_uid = None
                 
-            time.sleep(0.5)
+            time.sleep(self.scan_interval)
 
 if __name__ == "__main__":
     agent = NFCAgent()

@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Power, Activity, History, Tag, Database, Clock, Wifi, WifiOff } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Activity, History, Tag, Database, Clock, Wifi, WifiOff } from 'lucide-react';
+
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || `${API_BASE_URL.replace(/^http/, 'ws')}/ws/nfc/`;
 
 interface ScanData {
   id?: number;
@@ -31,7 +34,7 @@ export default function Dashboard() {
     let ws: WebSocket;
 
     const connectWS = () => {
-      ws = new WebSocket('ws://localhost:8000/ws/nfc/');
+      ws = new WebSocket(WS_URL);
 
       ws.onopen = () => {
         setIsConnected(true);
@@ -76,7 +79,7 @@ export default function Dashboard() {
 
   const fetchHistory = async () => {
     try {
-      const resp = await fetch('http://localhost:8000/api/scans/');
+      const resp = await fetch(`${API_BASE_URL}/api/scans/`);
       const data = await resp.json();
       const results = data.results || data;
       setScans(results);
@@ -89,7 +92,7 @@ export default function Dashboard() {
   const toggleListening = async (start: boolean) => {
     const endpoint = start ? 'start' : 'stop';
     try {
-      const resp = await fetch(`http://localhost:8000/api/${endpoint}/`, { method: 'POST' });
+      const resp = await fetch(`${API_BASE_URL}/api/${endpoint}/`, { method: 'POST' });
       if (resp.ok) {
         setIsListening(start);
         showToast(`Listener ${start ? 'Started' : 'Stopped'}`, 'success');
