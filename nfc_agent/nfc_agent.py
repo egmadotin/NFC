@@ -15,7 +15,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Logging setup
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+def setup_logging():
+    if getattr(sys, "frozen", False):
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    log_file = os.path.join(base_dir, "nfc_agent.log")
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    return log_file
+
+log_path = setup_logging()
 logger = logging.getLogger(__name__)
 
 class NFCAgent:
@@ -57,14 +74,24 @@ class NFCAgent:
         dc.ellipse([8, 8, 56, 56], fill=color)
         return image
 
+    def on_open_log(self, icon, item):
+        try:
+            os.startfile(log_path)
+        except Exception as e:
+            logger.error(f"Could not open log file: {e}")
+
     def on_quit(self, icon, item):
         self.running = False
         icon.stop()
         os._exit(0)
 
     def run_tray(self):
-        menu = Menu(MenuItem('Exit', self.on_quit))
-        self.icon = Icon("NFC Agent", self.create_image('red'), "NFC Agent: Disconnected", menu)
+        menu = Menu(
+            MenuItem(f'Status: Local Agent', lambda: None, enabled=False),
+            MenuItem('View Log', self.on_open_log),
+            MenuItem('Exit', self.on_quit)
+        )
+        self.icon = Icon("NFC Agent", self.create_image('red'), "NFC Agent: Initializing...", menu)
         self.icon.run()
 
     def update_status(self, connected):

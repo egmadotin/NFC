@@ -1,0 +1,31 @@
+# NFC Agent - Quick Start Guide
+
+This agent connects your ACR122U NFC reader to the centralized server.
+
+## Installation Steps:
+
+1. **Install NFC Reader Drivers**:
+   - Ensure the ACR122U Windows (PC/SC) drivers are installed.
+   - If missing, download them from the official vendor website (ACS.com.hk).
+
+2. **Verify Hardware Detection**:
+   - Run `CheckReader.exe`.
+   - It will open a console and list all detected readers.
+   - If it says "No readers detected," check your USB cable and the Windows "Smart Card" service.
+
+3. **Run the Agent**:
+   - Double-click `NFCAgent.exe`.
+   - A tray icon will appear (bottom-right taskbar).
+   - **RED icon**: Reader not detected.
+   - **GREEN icon**: Reader is ready!
+
+4. **Server Configuration**:
+   - Edit `config.json` in Notepad.
+   - Default server: `http://145.223.18.134:3001/api/scans/`
+
+5. **Troubleshooting**:
+   - Right-click the tray icon and select **View Log**.
+   - Review `nfc_agent.log` for error details.
+   - Ensure the "Smart Card" service is running in `services.msc`.
+
+Happy scanning!
