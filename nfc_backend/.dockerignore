@@ -2,10 +2,12 @@ __pycache__
 *.py[cod]
 *$py.class
 .venv
+/.venv
 venv
 ENV
 env
 .env
+.env.*
 .dockerignore
 Dockerfile
 docker-compose.yml

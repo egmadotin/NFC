@@ -3,3 +3,4 @@ requests
 pystray
 Pillow
 pyinstaller
+python-dotenv

@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
+**/.venv/
 .env
 db.sqlite3
 nfc_backend/db.sqlite3

@@ -1,7 +1,9 @@
 django
 daphne
 channels
+channels-redis
 djangorestframework
 django-cors-headers
 pyscard
 asgiref
+python-dotenv
