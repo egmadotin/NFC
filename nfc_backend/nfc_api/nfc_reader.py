@@ -9,10 +9,15 @@ from .models import Scan
 logger = logging.getLogger(__name__)
 
 def get_reader():
-    r = readers()
-    if len(r) > 0:
-        return r[0]
-    return None
+    try:
+        r = readers()
+        logger.debug(f"Detected readers: {[reader.name for reader in r]}")
+        if len(r) > 0:
+            return r[0]
+        return None
+    except Exception as e:
+        logger.error(f"Error enumerating readers: {e}")
+        return None
 
 def read_tag(reader_obj):
     try:

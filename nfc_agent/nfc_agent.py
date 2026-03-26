@@ -60,11 +60,17 @@ class NFCAgent:
             self.icon.title = status_text
 
     def get_reader(self):
-        r = readers()
-        for reader in r:
-            if self.reader_name_target in reader.name:
-                return reader
-        return r[0] if r else None
+        try:
+            r = readers()
+            logger.debug(f"Configured target reader: {self.reader_name_target}")
+            logger.debug(f"Detected readers: {[reader.name for reader in r]}")
+            for reader in r:
+                if self.reader_name_target in reader.name:
+                    return reader
+            return r[0] if r else None
+        except Exception as e:
+            logger.error(f"Error enumerating readers: {e}")
+            return None
 
     def send_to_server(self, data):
         try:
