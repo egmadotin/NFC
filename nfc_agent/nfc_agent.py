@@ -30,11 +30,22 @@ class NFCAgent:
         self.last_uid = None
         self.icon = None
 
+    def get_config_path(self):
+        # If running as PyInstaller bundle
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base_dir, "config.json")
+
     def load_config(self):
+        config_path = self.get_config_path()
         try:
-            if os.path.exists("config.json"):
-                with open("config.json", "r") as f:
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
                     return json.load(f)
+            else:
+                logger.warning(f"Config file not found at {config_path}, using defaults")
         except Exception as e:
             logger.error(f"Error loading config: {e}")
         return {}
@@ -84,7 +95,7 @@ class NFCAgent:
         return False
 
     def monitor_loop(self):
-        logger.info("NFC Agent monitor loop started")
+        logger.info(f"NFC Agent monitor loop started (URL: {self.server_url})")
         while self.running:
             reader = self.get_reader()
             
